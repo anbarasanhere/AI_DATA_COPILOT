@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Data Copilot</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">A</span><span>AI Data Copilot</span></div>
+        <button class="new-chat" id="new-chat"><span>+</span> New analysis</button>
+        <div class="nav-label">Workspace</div>
+        <button class="nav-item active"><span class="nav-icon">◈</span> Ask your data</button>
+        <button class="nav-item" id="schema-nav"><span class="nav-icon">⌘</span> Schema explorer</button>
+        <div class="sidebar-footer"><div class="connection-dot"></div><div><strong>MySQL connected</strong><small>FM · read-only mode</small></div></div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar"><div><p class="eyebrow">ANALYTICS WORKSPACE</p><h1>Ask your data</h1></div><div class="top-status"><span class="status-dot"></span> Live database <span class="divider"></span> MySQL 8.3</div></header>
+        <section class="content">
+          <div class="hero-copy"><h2>What would you like to understand?</h2><p>Ask a business question or run a read-only query against your market data.</p></div>
+          <section class="prompt-panel">
+            <label for="question">Natural-language question</label>
+            <textarea id="question" rows="3" placeholder="e.g. Which products generated the highest revenue?"></textarea>
+            <div class="prompt-actions"><div class="hint">Enter a question to retrieve schema and generate SQL</div><button class="primary-button" id="ask-button">Ask Copilot <span>↗</span></button></div>
+          </section>
+          <div class="quick-grid"><button class="quick-card" data-question="Which products generated the highest revenue?"><span class="quick-icon green">↗</span><span><strong>Top products</strong><small>Revenue by product</small></span></button><button class="quick-card" data-question="Which vendors have the most inventory?"><span class="quick-icon orange">▤</span><span><strong>Vendor inventory</strong><small>Compare available stock</small></span></button><button class="quick-card" data-question="How many purchases happened on each market date?"><span class="quick-icon blue">◷</span><span><strong>Market activity</strong><small>Purchases over time</small></span></button></div>
+          <section class="result-panel" id="result-panel"><div class="empty-state"><div class="empty-orbit">✦</div><h3>Your analysis will appear here</h3><p>Results, generated SQL, and source tables will be shown in one place.</p></div></section>
+          <section class="sql-panel"><div class="section-heading"><div><p class="eyebrow">DIRECT QUERY</p><h2>Read-only SQL runner</h2></div><span class="safe-badge">✓ SELECT only</span></div><textarea id="sql" class="sql-editor" spellcheck="false">SELECT COUNT(*) AS vendor_count FROM vendor;</textarea><div class="sql-footer"><span>Queries are validated before execution</span><button class="secondary-button" id="run-button">Run query <span>▶</span></button></div></section>
+        </section>
+      </main>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

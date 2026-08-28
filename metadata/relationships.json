@@ -1,0 +1,32 @@
+{
+  "source": "user-supplied relationship diagram",
+  "status": "validated_with_data_review",
+  "notes": [
+    "This contract describes the supplied diagram and does not alter MySQL.",
+    "The live database now contains vendor and all tables shown in the diagram.",
+    "The live database also contains datetime_demo, which is not shown in the diagram.",
+    "The live database declares vendor.vendor_id as a primary key but currently declares no foreign keys.",
+    "Live validation found 10 valid relationships and one review item: customer_purchases.customer_id has 3 orphan values not present in customer.customer_id."
+  ],
+  "primary_keys_shown": [
+    {"table": "market_date_info", "columns": ["market_date"]},
+    {"table": "customer", "columns": ["customer_id"]},
+    {"table": "product_category", "columns": ["product_category_id"]},
+    {"table": "product", "columns": ["product_id"]},
+    {"table": "vendor", "columns": ["vendor_id"]},
+    {"table": "booth", "columns": ["booth_number"]}
+  ],
+  "relationships": [
+    {"from_table": "market_date_info", "from_columns": ["market_date"], "to_table": "customer_purchases", "to_columns": ["market_date"]},
+    {"from_table": "market_date_info", "from_columns": ["market_date"], "to_table": "vendor_booth_assignments", "to_columns": ["market_date"]},
+    {"from_table": "market_date_info", "from_columns": ["market_date"], "to_table": "vendor_inventory", "to_columns": ["market_date"]},
+    {"from_table": "customer", "from_columns": ["customer_id"], "to_table": "customer_purchases", "to_columns": ["customer_id"]},
+    {"from_table": "product_category", "from_columns": ["product_category_id"], "to_table": "product", "to_columns": ["product_category_id"]},
+    {"from_table": "product", "from_columns": ["product_id"], "to_table": "customer_purchases", "to_columns": ["product_id"]},
+    {"from_table": "product", "from_columns": ["product_id"], "to_table": "vendor_inventory", "to_columns": ["product_id"]},
+    {"from_table": "vendor", "from_columns": ["vendor_id"], "to_table": "customer_purchases", "to_columns": ["vendor_id"]},
+    {"from_table": "vendor", "from_columns": ["vendor_id"], "to_table": "vendor_booth_assignments", "to_columns": ["vendor_id"]},
+    {"from_table": "vendor", "from_columns": ["vendor_id"], "to_table": "vendor_inventory", "to_columns": ["vendor_id"]},
+    {"from_table": "booth", "from_columns": ["booth_number"], "to_table": "vendor_booth_assignments", "to_columns": ["booth_number"]}
+  ]
+}
