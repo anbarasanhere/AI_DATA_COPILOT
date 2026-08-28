@@ -1,5 +1,9 @@
 # AI Data Engineering Copilot
 
+## About
+
+AI Data Engineering Copilot is a read-only analytics foundation for exploring an existing MySQL database with natural-language questions and safe SQL. It discovers tables, columns, indexes, relationships, samples, and column profiles; validates logical relationships against live data; retrieves relevant schema context; and optionally uses an OpenAI-compatible provider to generate analytical queries. A FastAPI service exposes the workflow through a lightweight browser interface, while SQLGlot, read-only transactions, and bounded results help keep query execution controlled.
+
 This repository currently implements the Phase 1 database-discovery foundation. It connects to an existing MySQL database using environment variables and performs read-only schema introspection. It does not create, alter, truncate, or load tables.
 
 ## Setup
