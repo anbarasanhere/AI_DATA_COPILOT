@@ -6,6 +6,11 @@ AI Data Engineering Copilot is a read-only analytics foundation for exploring an
 
 This repository currently implements the Phase 1 database-discovery foundation. It connects to an existing MySQL database using environment variables and performs read-only schema introspection. It does not create, alter, truncate, or load tables.
 
+<img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 00 PM" src="https://github.com/user-attachments/assets/a8538640-0069-4020-bca9-d2cdebd80f00" />
+------------------------------------------------------------------------------------------------------
+<img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 28 PM" src="https://github.com/user-attachments/assets/791ad180-bc7c-4471-ae5d-98ca8fbe3751" />
+------------------------------------------------------------------------------------------------------
+
 ## Setup
 
 Use Python 3.12 or newer, then install the package and development tools:
