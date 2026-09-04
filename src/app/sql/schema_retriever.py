@@ -17,6 +17,14 @@ class SchemaRetriever:
 
     def retrieve(self, question: str, limit: int = 5) -> dict[str, Any]:
         tokens = set(re.findall(r"[a-z0-9_]+", question.casefold()))
+        browse_schema = not tokens or tokens & {
+            "all",
+            "column",
+            "columns",
+            "schema",
+            "table",
+            "tables",
+        }
         scored: list[tuple[int, dict[str, Any]]] = []
         for table in self.metadata.get("tables", []):
             searchable = {table["name"].casefold()}
@@ -26,10 +34,14 @@ class SchemaRetriever:
             score = sum(token in searchable or token in " ".join(searchable) for token in tokens)
             if score:
                 scored.append((score, table))
-        selected = [
-            table
-            for _, table in sorted(scored, key=lambda item: (-item[0], item[1]["name"]))[:limit]
-        ]
+        selected = (
+            self.metadata.get("tables", [])[:limit]
+            if browse_schema
+            else [
+                table
+                for _, table in sorted(scored, key=lambda item: (-item[0], item[1]["name"]))[:limit]
+            ]
+        )
         names = {table["name"] for table in selected}
         relationships = [
             relation

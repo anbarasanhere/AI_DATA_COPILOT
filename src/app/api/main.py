@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -15,11 +16,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.agents.sql_agent import OpenAISqlGenerator, SqlGenerator
 from app.db.config import get_settings
 from app.db.connection import check_connection, create_mysql_engine, read_only_connection
+from app.knowledge_graph.graph import build_knowledge_graph, write_knowledge_graph
+from app.knowledge_graph.retriever import KnowledgeGraphRetriever
 from app.sql.schema_retriever import SchemaRetriever
 from app.sql.validator import validate_read_only_sql
 
 
-class SchemaSearchRequest(BaseModel):
+class SchemaSearchRequest(BaseModel):  # This is a Pydantic model used to validate incoming data.
     question: str = Field(min_length=1, max_length=1000)
     limit: int = Field(default=5, ge=1, le=20)
 
@@ -46,7 +49,9 @@ class ChatResponse(QueryResponse):
     tables: list[str]
 
 
-def _json_value(value: object) -> object:
+def _json_value(
+    value: object,
+) -> object:  # object basically means this func, recieves any python value
     if isinstance(value, (date, datetime)):
         return value.isoformat()
     if isinstance(value, Decimal):
@@ -56,14 +61,33 @@ def _json_value(value: object) -> object:
     return value
 
 
-def create_app() -> FastAPI:
+def create_app() -> FastAPI:  # the func, is expected to return FastAPI object
+    # create_app builds and configures FastAPI Application
+    # It sets up the database, schema retriever, AI SQL generator, API endpoints, and finally returns the FastAPI app.
+    # You can think of the function as a factory that builds your API.
     settings = get_settings()
     engine = create_mysql_engine(settings)
     metadata_path = Path(settings.mysql_output_dir) / "database_metadata.json"
     relationship_path = Path("metadata/relationships.json")
+    validation_path = Path(settings.mysql_output_dir) / "relationship_validation.json"
+    graph_path = Path(settings.mysql_output_dir) / "knowledge_graph.json"
     retriever = (
         SchemaRetriever(metadata_path, relationship_path) if metadata_path.exists() else None
     )
+    graph_retriever = None
+    if metadata_path.exists() and relationship_path.exists():
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        relationships = json.loads(relationship_path.read_text(encoding="utf-8"))
+        validation = (
+            json.loads(validation_path.read_text(encoding="utf-8"))
+            if validation_path.exists()
+            else None
+        )
+        if not graph_path.exists():
+            write_knowledge_graph(
+                build_knowledge_graph(metadata, relationships, validation), graph_path
+            )
+        graph_retriever = KnowledgeGraphRetriever(graph_path, metadata)
     generator: SqlGenerator | None = None
     if settings.llm_provider.casefold() in {"openai", "openrouter"} and settings.llm_api_key:
         generator = OpenAISqlGenerator(
@@ -108,9 +132,17 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/schema/search")
     def schema_search(request: SchemaSearchRequest) -> dict[str, Any]:
-        if retriever is None:
+        if graph_retriever is not None:
+            return graph_retriever.retrieve(request.question, request.limit)
+        if graph_retriever is None and retriever is None:
             raise HTTPException(status_code=503, detail="Schema metadata is unavailable")
         return retriever.retrieve(request.question, request.limit)
+
+    @app.post("/api/v1/knowledge/search")
+    def knowledge_search(request: SchemaSearchRequest) -> dict[str, Any]:
+        if graph_retriever is None:
+            raise HTTPException(status_code=503, detail="Knowledge graph is unavailable")
+        return graph_retriever.retrieve(request.question, request.limit)
 
     @app.post("/api/v1/query", response_model=QueryResponse)
     def query(request: QueryRequest) -> QueryResponse:
@@ -122,7 +154,11 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=503, detail="Schema metadata is unavailable")
         if generator is None:
             raise HTTPException(status_code=503, detail="SQL generation provider is not configured")
-        schema = retriever.retrieve(request.question, request.schema_limit)
+        schema = (
+            graph_retriever.retrieve(request.question, request.schema_limit)
+            if graph_retriever is not None
+            else retriever.retrieve(request.question, request.schema_limit)
+        )
         try:
             generation = generator.generate(request.question, schema)
         except Exception as exc:

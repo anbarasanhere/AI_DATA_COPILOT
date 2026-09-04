@@ -6,6 +6,8 @@ AI Data Engineering Copilot is a read-only analytics foundation for exploring an
 
 This repository currently implements the Phase 1 database-discovery foundation. It connects to an existing MySQL database using environment variables and performs read-only schema introspection. It does not create, alter, truncate, or load tables.
 
+It also includes a file-backed schema knowledge graph built from the discovery and relationship reports. The graph improves relationship-aware retrieval before SQL generation without replacing MySQL or the read-only SQL validator.
+
 <img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 00 PM" src="https://github.com/user-attachments/assets/a8538640-0069-4020-bca9-d2cdebd80f00" />
 ------------------------------------------------------------------------------------------------------
 <img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 28 PM" src="https://github.com/user-attachments/assets/791ad180-bc7c-4471-ae5d-98ca8fbe3751" />
@@ -47,6 +49,14 @@ validate-relationships
 
 The current report has 10 valid relationships and one review item: 3 `customer_purchases.customer_id` values do not match `customer.customer_id`. No foreign-key constraints are added automatically.
 
+Build the knowledge graph after generating or updating the reports:
+
+```bash
+build-knowledge-graph
+```
+
+This writes `artifacts/knowledge_graph.json` with database, table, column, and relationship nodes. Relationship edges retain their `valid`, `review`, or `unvalidated` status and source artifact.
+
 ## Query API
 
 Start the read-only API with:
@@ -59,7 +69,16 @@ Available endpoints:
 
 - `GET /health` checks the MySQL connection.
 - `POST /api/v1/schema/search` retrieves relevant tables for a question.
+- `POST /api/v1/knowledge/search` retrieves relevant tables plus one-hop graph relationship context.
 - `POST /api/v1/query` validates and executes one read-only `SELECT` or `WITH` query.
 - `POST /api/v1/chat` retrieves schema, generates structured SQL, validates it, and executes it.
 
-Natural-language SQL generation requires `LLM_PROVIDER=openrouter` and an OpenRouter `LLM_API_KEY` in `.env`. Use an OpenRouter model ID such as `openai/gpt-4o-mini` or a currently available free model. Set `LLM_BASE_URL=https://openrouter.ai/api/v1`. The provider and model are configurable with `LLM_MODEL` and `LLM_BASE_URL`. Without those settings, `/api/v1/chat` returns `503` and does not execute anything.
+Natural-language SQL generation requires `LLM_PROVIDER=openai` and an OpenAI `LLM_API_KEY` in `.env`. Use a model such as `gpt-4o-mini`. Leave `LLM_BASE_URL` empty to use the default OpenAI endpoint. OpenRouter is also supported by setting `LLM_PROVIDER=openrouter`, an OpenRouter-compatible model, and `LLM_BASE_URL=https://openrouter.ai/api/v1`. Without a supported provider and API key, `/api/v1/chat` returns `503` and does not execute anything.
+
+run the project
+--
+source .venv/bin/activate && python --version && pytest -q
+
+source .venv/bin/activate && command -v uvicorn && command -v inspect-mysql && command -v validate-relationships
+
+PYTHONPATH=src uvicorn app.api.main:app --port 8000

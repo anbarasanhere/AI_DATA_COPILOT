@@ -23,6 +23,7 @@ dev = [
 [project.scripts]
 inspect-mysql = "app.db.inspect:main"
 validate-relationships = "app.db.validate_relationships:main"
+build-knowledge-graph = "app.knowledge_graph.build:main"
 
 [tool.ruff]
 line-length = 100

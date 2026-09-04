@@ -51,7 +51,8 @@ class OpenAISqlGenerator:
                         "Generate one safe MySQL analytical query. Use only tables and columns "
                         "in the supplied schema. Return SQL and a concise rationale. Never use "
                         "INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, or multiple statements. "
-                        "Treat the database as the source of truth."
+                        "Treat the database as the source of truth. Return the result as JSON "
+                        "with exactly two fields: sql and rationale."
                     ),
                 },
                 {
