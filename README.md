@@ -8,6 +8,15 @@ This repository currently implements the Phase 1 database-discovery foundation. 
 
 It also includes a file-backed schema knowledge graph built from the discovery and relationship reports. The graph improves relationship-aware retrieval before SQL generation without replacing MySQL or the read-only SQL validator.
 
+## Project Architecture 
+
+MySQL (read-only account) -> SQLAlchemy connection -> FastAPI query API
+								  |
+								  +-> information_schema inspector -> JSON/Markdown metadata
+								  +-> SQLGlot validator -> bounded SELECT execution
+								  +-> knowledge graph -> relationship-aware retriever -> structured LLM SQL -> validator
+
+
 <img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 00 PM" src="https://github.com/user-attachments/assets/a8538640-0069-4020-bca9-d2cdebd80f00" />
 ------------------------------------------------------------------------------------------------------
 <img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 28 PM" src="https://github.com/user-attachments/assets/791ad180-bc7c-4471-ae5d-98ca8fbe3751" />
