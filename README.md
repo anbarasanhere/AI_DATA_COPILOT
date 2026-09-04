@@ -10,11 +10,13 @@ It also includes a file-backed schema knowledge graph built from the discovery a
 
 ## Project Architecture 
 
+```text
 MySQL (read-only account) -> SQLAlchemy connection -> FastAPI query API
 								  |
 								  +-> information_schema inspector -> JSON/Markdown metadata
 								  +-> SQLGlot validator -> bounded SELECT execution
 								  +-> knowledge graph -> relationship-aware retriever -> structured LLM SQL -> validator
+```
 
 
 <img width="1279" height="577" alt="Screenshot 2026-08-28 at 3 36 00 PM" src="https://github.com/user-attachments/assets/a8538640-0069-4020-bca9-d2cdebd80f00" />
